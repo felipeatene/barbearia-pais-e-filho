@@ -3,318 +3,832 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Barbearia Pais e Filhos - Agendamento</title>
-    
+    <title>Barbearia Pais e Filhos</title>
+
     <script src="https://cdn.tailwindcss.com"></script>
-    
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
-    
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        gold: { DEFAULT: '#c9a258', light: '#e0bc7a', dark: '#a8853d' }
+                    }
+                }
+            }
+        };
+    </script>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 
     <style>
-        body { font-family: 'Inter', sans-serif; }
-        
-        /* Customizações de scrollbar */
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        html { scroll-behavior: smooth; }
+        body { font-family: 'Inter', sans-serif; background: #0a0a0a; color: #f5f5f5; }
+
+        /* ── Scrollbar ── */
         ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb { background: #c1c1c1; border-radius: 4px; }
-        
-        /* Ocultar elementos */
+        ::-webkit-scrollbar-track { background: #111; }
+        ::-webkit-scrollbar-thumb { background: #c9a258; border-radius: 4px; }
+
+        /* ── Gold gradient text ── */
+        .text-gold {
+            background: linear-gradient(135deg, #c9a258, #e0bc7a, #a8853d);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* ── Hero entrance animations ── */
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(28px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        .hero-1 { animation: fadeUp .7s ease .1s both; }
+        .hero-2 { animation: fadeUp .7s ease .3s both; }
+        .hero-3 { animation: fadeUp .7s ease .5s both; }
+        .hero-4 { animation: fadeUp .7s ease .7s both; }
+        .hero-5 { animation: fadeUp .7s ease .9s both; }
+
+        /* ── Scroll-reveal (below the fold) ── */
+        .reveal {
+            opacity: 0;
+            transform: translateY(28px);
+            transition: opacity .7s ease, transform .7s ease;
+        }
+        .reveal.delay-1 { transition-delay: .1s; }
+        .reveal.delay-2 { transition-delay: .2s; }
+        .reveal.delay-3 { transition-delay: .3s; }
+        .reveal.delay-4 { transition-delay: .4s; }
+        .reveal.visible  { opacity: 1; transform: translateY(0); }
+
+        .reveal-scale {
+            opacity: 0;
+            transform: scale(.92);
+            transition: opacity .6s ease, transform .6s ease;
+        }
+        .reveal-scale.visible { opacity: 1; transform: scale(1); }
+
+        /* ── Buttons ── */
+        .btn-gold {
+            background: #c9a258;
+            color: #0a0a0a;
+            font-weight: 700;
+            border-radius: 9999px;
+            transition: background .2s, transform .2s, box-shadow .2s;
+        }
+        .btn-gold:hover {
+            background: #e0bc7a;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(201,162,88,.35);
+        }
+        .btn-outline {
+            border: 1px solid #c9a258;
+            color: #c9a258;
+            border-radius: 9999px;
+            transition: background .2s, color .2s, transform .2s;
+        }
+        .btn-outline:hover {
+            background: #c9a258;
+            color: #0a0a0a;
+            transform: translateY(-2px);
+        }
+
+        /* ── Nav link underline ── */
+        .nav-link { position: relative; }
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            width: 0; height: 1px;
+            background: #c9a258;
+            bottom: -2px; left: 0;
+            transition: width .3s ease;
+        }
+        .nav-link:hover::after { width: 100%; }
+
+        /* ── Service & bar cards ── */
+        .card {
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-radius: .75rem;
+            transition: border-color .3s, transform .3s, box-shadow .3s;
+        }
+        .card:hover {
+            border-color: #c9a258;
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(201,162,88,.15);
+        }
+
+        /* ── Gallery items ── */
+        .gallery-item {
+            overflow: hidden;
+            border-radius: .5rem;
+            background: #1a1a1a;
+        }
+        .gallery-item > div {
+            transition: transform .5s ease;
+        }
+        .gallery-item:hover > div { transform: scale(1.05); }
+
+        /* ── Loyalty timeline ── */
+        .loyalty-step {
+            border-left: 2px solid #c9a258;
+            padding-left: 1.5rem;
+            position: relative;
+        }
+        .loyalty-step::before {
+            content: '';
+            position: absolute;
+            left: -6px; top: 4px;
+            width: 10px; height: 10px;
+            border-radius: 50%;
+            background: #c9a258;
+        }
+
+        /* ── Booking modal ── */
+        #modal-overlay {
+            display: none;
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,.85);
+            z-index: 100;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(4px);
+        }
+        #modal-overlay.active { display: flex; }
+
+        /* ── Util ── */
         .hidden-step { display: none !important; }
 
-        /* Toast de erro */
+        /* ── Toast ── */
         #toast {
             visibility: hidden;
             min-width: 250px;
-            background-color: #ef4444; /* Vermelho Tailwind */
+            background: #ef4444;
             color: #fff;
             text-align: center;
             border-radius: 8px;
             padding: 12px;
             position: fixed;
-            z-index: 50;
-            left: 50%;
-            bottom: 30px;
+            z-index: 200;
+            left: 50%; bottom: 30px;
             transform: translateX(-50%);
             font-size: 14px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            transition: visibility 0.3s, opacity 0.3s linear;
+            box-shadow: 0 4px 6px rgba(0,0,0,.3);
+            transition: visibility .3s, opacity .3s linear;
             opacity: 0;
         }
-        #toast.show {
-            visibility: visible;
-            opacity: 1;
-        }
+        #toast.show { visibility: visible; opacity: 1; }
     </style>
 </head>
-<body class="bg-blue-100 min-h-screen text-slate-800 flex justify-center pb-10">
+<body>
 
-    <div class="w-full max-w-[420px] p-4 space-y-4">
-        
-        <div class="bg-white rounded-xl shadow-sm overflow-hidden animate__animated animate__fadeInDown">
-            <div class="bg-black p-8 text-center text-white relative">
-                <h1 class="text-2xl font-bold tracking-widest uppercase">Barbearia</h1>
-                <div class="my-3 mx-auto w-16 h-16 border-2 border-white rounded-full flex items-center justify-center">
-                    <span class="text-2xl">✂️</span>
-                </div>
-                <p class="text-xs tracking-widest mb-1 uppercase">Pais e Filhos</p>
-                <h2 class="text-xl font-medium mt-4">Raul Mateus</h2>
-            </div>
-            <div class="p-3 bg-gray-50 border-t border-gray-100 text-sm text-gray-600 text-center">
-                barbearia pais e filhos 💈
+<!-- ============================================================
+     NAVBAR
+============================================================ -->
+<nav id="navbar" class="fixed top-0 left-0 right-0 z-50 transition-all duration-300">
+    <div class="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
+        <a href="#hero" class="flex items-center gap-3">
+            <span class="text-xl" aria-hidden="true">✂️</span>
+            <span class="font-black tracking-widest uppercase text-sm text-white">Pais e Filhos</span>
+        </a>
+        <div class="hidden md:flex items-center gap-8 text-sm text-gray-400">
+            <a href="#servicos"   class="nav-link hover:text-white transition-colors">Serviços</a>
+            <a href="#galeria"    class="nav-link hover:text-white transition-colors">Galeria</a>
+            <a href="#fidelidade" class="nav-link hover:text-white transition-colors">Fidelidade</a>
+            <a href="#contato"    class="nav-link hover:text-white transition-colors">Contato</a>
+        </div>
+        <button onclick="openModal()" class="btn-gold px-5 py-2 text-sm">Agendar Horário</button>
+    </div>
+</nav>
+
+<!-- ============================================================
+     1. HERO
+============================================================ -->
+<section id="hero" class="relative min-h-screen flex flex-col items-center justify-center text-center px-6 overflow-hidden"
+         style="background: #0a0a0a;">
+    <!-- Subtle grid decoration -->
+    <div class="absolute inset-0 opacity-[0.04] pointer-events-none"
+         style="background-image: repeating-linear-gradient(0deg,transparent,transparent 60px,#c9a258 60px,#c9a258 61px),
+                                   repeating-linear-gradient(90deg,transparent,transparent 60px,#c9a258 60px,#c9a258 61px);">
+    </div>
+    <!-- Radial glow -->
+    <div class="absolute inset-0 pointer-events-none"
+         style="background: radial-gradient(ellipse at 30% 50%,rgba(201,162,88,.07) 0%,transparent 60%),
+                             radial-gradient(ellipse at 70% 20%,rgba(201,162,88,.05) 0%,transparent 50%);">
+    </div>
+
+    <div class="relative z-10 max-w-3xl">
+        <p class="text-gold text-xs font-semibold tracking-[.4em] uppercase mb-6 hero-1">Desde o primeiro corte</p>
+
+        <div class="hero-2 mb-6">
+            <div class="w-20 h-20 border-2 border-[#c9a258] rounded-full flex items-center justify-center mx-auto mb-6">
+                <span class="text-3xl" aria-hidden="true">✂️</span>
             </div>
         </div>
 
-        <div class="bg-white p-5 rounded-xl shadow-sm min-h-[400px] flex flex-col animate__animated animate__fadeInUp">
-            
-            <div id="step-1" class="step-container flex-1">
-                <h3 class="text-lg font-semibold mb-4 text-slate-700">Escolha o serviço</h3>
-                <div class="space-y-2 max-h-[300px] overflow-y-auto pr-1" id="services-list">
-                    </div>
-            </div>
+        <h1 class="text-5xl md:text-7xl font-black uppercase tracking-tight text-white leading-none mb-3 hero-3">
+            Barbearia
+        </h1>
+        <h2 class="text-3xl md:text-5xl font-light tracking-[.3em] uppercase text-[#c9a258] mb-8 hero-4">
+            Pais e Filhos
+        </h2>
 
-            <div id="step-2" class="step-container hidden-step flex-1 animate__animated animate__fadeIn">
-                <h3 class="text-lg font-semibold mb-4 text-slate-700">Escolha o dia</h3>
-                <div class="border rounded-lg p-3">
-                    <div class="flex justify-between items-center mb-4">
-                        <button class="text-gray-400 hover:text-black">◀</button>
-                        <span class="font-semibold text-slate-700" id="lbl-month">Junho 2026</span>
-                        <button class="text-gray-400 hover:text-black">▶</button>
-                    </div>
-                    <div class="grid grid-cols-7 gap-1 text-center text-xs font-semibold text-gray-400 mb-2">
-                        <div>D</div><div>S</div><div>T</div><div>Q</div><div>Q</div><div>S</div><div>S</div>
-                    </div>
-                    <div id="calendar-grid" class="grid grid-cols-7 gap-1 text-center text-sm">
-                        </div>
-                </div>
-            </div>
+        <p class="text-gray-400 text-lg max-w-xl mx-auto mb-10 hero-5">
+            Muito mais que um corte. Um ritual entre gerações, num espaço onde a navalha encontra o drinque perfeito.
+        </p>
 
-            <div id="step-3" class="step-container hidden-step flex-1 animate__animated animate__fadeIn">
-                <h3 class="text-lg font-semibold mb-4 text-slate-700">Escolha a hora (<span id="lbl-date"></span>)</h3>
-                <div class="space-y-2 h-[300px] overflow-y-auto pr-1" id="time-list">
-                    </div>
-            </div>
-
-            <div class="mt-6 space-y-3 pt-4 border-t border-gray-100">
-                <button id="btn-next" onclick="nextStep()" class="w-full bg-[#5cb85c] hover:bg-[#4cae4c] text-white font-medium py-3 rounded-lg transition-colors flex justify-center items-center gap-2 shadow-sm">
-                    Avançar ➔
-                </button>
-                <button id="btn-back" onclick="prevStep()" class="w-full bg-white border border-gray-300 text-gray-600 hover:bg-gray-50 font-medium py-3 rounded-lg transition-colors flex justify-center items-center gap-2 hidden-step">
-                    ⬅ Trocar dia/serviço
-                </button>
-            </div>
-
+        <div class="flex flex-col sm:flex-row gap-4 justify-center hero-5">
+            <button onclick="openModal()" class="btn-gold px-8 py-4 text-base">Agendar Horário ✂️</button>
+            <a href="#conceito" class="btn-outline px-8 py-4 text-base inline-block text-center">Conheça a vibe ↓</a>
         </div>
     </div>
 
-    <div id="toast">Por favor, selecione uma opção para avançar.</div>
+    <!-- Scroll indicator -->
+    <div class="absolute bottom-10 left-1/2 -translate-x-1/2 animate-bounce" aria-hidden="true">
+        <div class="w-6 h-10 border-2 border-gray-600 rounded-full flex items-start justify-center pt-2">
+            <div class="w-1 h-2 bg-[#c9a258] rounded-full"></div>
+        </div>
+    </div>
+</section>
 
-    <script>
-        // ==========================================================
-        // CONFIGURAÇÃO
-        // ==========================================================
-        // Número da barbearia no formato internacional, somente dígitos
-        // (DDI + DDD + número). Ex.: 55 (Brasil) + 11 + 999999999.
-        // >>> SUBSTITUA pelo número real da barbearia <<<
-        const WHATSAPP_NUMBER = "5511999999999";
+<!-- ============================================================
+     2. CONCEITO / VIBE
+============================================================ -->
+<section id="conceito" class="py-24 px-6" style="background: #111;">
+    <div class="max-w-4xl mx-auto text-center">
+        <p class="text-gold text-xs font-semibold tracking-[.4em] uppercase mb-4 reveal">Nossa essência</p>
+        <h2 class="text-4xl md:text-5xl font-black uppercase text-white mb-4 reveal delay-1">A Vibe</h2>
+        <div class="w-16 h-px bg-[#c9a258] mx-auto mb-10 reveal delay-1"></div>
 
-        // Mês/ano exibidos na agenda (month: 0 = Janeiro ... 11 = Dezembro)
-        const SCHEDULE_YEAR = 2026;
-        const SCHEDULE_MONTH = 5; // Junho
+        <p class="text-gray-400 text-xl leading-relaxed mb-14 reveal delay-2">
+            Um espaço onde gerações se encontram. A tradição do bom corte se mistura com o prazer de um bom drink.
+            É o lugar onde o pai traz o filho, o filho vira homem, e ambos ficam para mais uma rodada.
+        </p>
 
-        const MONTH_NAMES = [
-            "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
-            "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="card p-6 reveal-scale delay-1" style="transition-delay:.1s">
+                <div class="text-3xl mb-4" aria-hidden="true">✂️</div>
+                <h3 class="font-bold text-white mb-2">A Cadeira</h3>
+                <p class="text-gray-400 text-sm">Cortes precisos, barba feita com respeito. Técnica e estilo passados de mão em mão.</p>
+            </div>
+            <div class="card p-6 reveal-scale" style="transition-delay:.2s">
+                <div class="text-3xl mb-4" aria-hidden="true">🍺</div>
+                <h3 class="font-bold text-white mb-2">O Balcão</h3>
+                <p class="text-gray-400 text-sm">Cervejas geladas, drinks artesanais e boa conversa. Porque o melhor corte merece uma boa bebida.</p>
+            </div>
+            <div class="card p-6 reveal-scale" style="transition-delay:.3s">
+                <div class="text-3xl mb-4" aria-hidden="true">🏆</div>
+                <h3 class="font-bold text-white mb-2">A Tradição</h3>
+                <p class="text-gray-400 text-sm">Um ambiente autêntico, de verdadeiros entusiastas. A memória afetiva que você vai querer passar adiante.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ============================================================
+     3. SERVIÇOS
+============================================================ -->
+<section id="servicos" class="py-24 px-6" style="background: #0a0a0a;">
+    <div class="max-w-5xl mx-auto">
+        <div class="text-center mb-16">
+            <p class="text-gold text-xs font-semibold tracking-[.4em] uppercase mb-4 reveal">O que oferecemos</p>
+            <h2 class="text-4xl md:text-5xl font-black uppercase text-white reveal delay-1">Nossos Serviços</h2>
+            <div class="w-16 h-px bg-[#c9a258] mx-auto mt-6 reveal delay-1"></div>
+        </div>
+
+        <!-- Bloco A: A Cadeira -->
+        <div class="mb-14">
+            <h3 class="text-xs font-semibold tracking-[.4em] uppercase text-[#c9a258] mb-6 flex items-center gap-3 reveal">
+                <span class="w-8 h-px bg-[#c9a258] inline-block" aria-hidden="true"></span>
+                ✂️ A Cadeira — Cortes &amp; Tratamentos
+            </h3>
+            <div id="chair-services" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"></div>
+        </div>
+
+        <!-- Bloco B: O Balcão -->
+        <div>
+            <h3 class="text-xs font-semibold tracking-[.4em] uppercase text-[#c9a258] mb-6 flex items-center gap-3 reveal">
+                <span class="w-8 h-px bg-[#c9a258] inline-block" aria-hidden="true"></span>
+                🍺 O Balcão — Drinks &amp; Petiscos
+            </h3>
+            <div id="bar-items" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"></div>
+        </div>
+
+        <div class="text-center mt-12 reveal">
+            <button onclick="openModal()" class="btn-gold px-8 py-4 text-base">Agendar Agora ✂️</button>
+        </div>
+    </div>
+</section>
+
+<!-- ============================================================
+     4. GALERIA
+============================================================ -->
+<section id="galeria" class="py-24 px-6" style="background: #111;">
+    <div class="max-w-5xl mx-auto">
+        <div class="text-center mb-16">
+            <p class="text-gold text-xs font-semibold tracking-[.4em] uppercase mb-4 reveal">A Vitrine</p>
+            <h2 class="text-4xl md:text-5xl font-black uppercase text-white reveal delay-1">Galeria</h2>
+            <div class="w-16 h-px bg-[#c9a258] mx-auto mt-6 reveal delay-1"></div>
+        </div>
+        <div id="gallery-grid" class="grid grid-cols-2 md:grid-cols-3 gap-3"></div>
+    </div>
+</section>
+
+<!-- ============================================================
+     5. CLUBE DE FIDELIDADE
+============================================================ -->
+<section id="fidelidade" class="py-24 px-6" style="background: #0a0a0a;">
+    <div class="max-w-4xl mx-auto">
+        <div class="text-center mb-16">
+            <p class="text-gold text-xs font-semibold tracking-[.4em] uppercase mb-4 reveal">Programa de retorno</p>
+            <h2 class="text-4xl md:text-5xl font-black uppercase text-white reveal delay-1">Clube de Fidelidade</h2>
+            <div class="w-16 h-px bg-[#c9a258] mx-auto mt-6 mb-6 reveal delay-1"></div>
+            <p class="text-gray-400 text-lg reveal delay-2">Quanto mais você vem, mais vantagens você ganha.</p>
+        </div>
+
+        <div class="grid md:grid-cols-2 gap-12 items-start">
+            <div class="space-y-8">
+                <div class="loyalty-step reveal delay-1">
+                    <h4 class="font-bold text-white mb-1">1ª Visita</h4>
+                    <p class="text-gray-400 text-sm">Seja bem-vindo. Apresente-se, escolha seu corte e sinta a diferença.</p>
+                </div>
+                <div class="loyalty-step reveal delay-2">
+                    <h4 class="font-bold text-white mb-1">3ª Visita</h4>
+                    <p class="text-gray-400 text-sm">Você já é da casa. Ganhe um drink cortesia na próxima passagem pelo balcão.</p>
+                </div>
+                <div class="loyalty-step reveal delay-3">
+                    <h4 class="font-bold text-white mb-1">5ª Visita</h4>
+                    <p class="text-gray-400 text-sm">Cliente VIP. Desconto em serviços e acesso a promoções exclusivas.</p>
+                </div>
+                <div class="loyalty-step reveal delay-4">
+                    <h4 class="font-bold text-white mb-1">10ª Visita 🏆</h4>
+                    <p class="text-gray-400 text-sm">Membro fundador do Clube. Corte gratuito e seu nome na nossa lista de honra.</p>
+                </div>
+            </div>
+
+            <div class="card p-8 text-center reveal-scale">
+                <div class="text-5xl mb-6" aria-hidden="true">🏅</div>
+                <h3 class="text-2xl font-black text-white uppercase mb-3">Faça parte</h3>
+                <p class="text-gray-400 text-sm mb-6">
+                    Cadastre-se pelo WhatsApp e comece a acumular seus pontos a partir do primeiro corte.
+                </p>
+                <!-- >>> SUBSTITUA o número abaixo pelo número real da barbearia <<< -->
+                <a href="https://wa.me/5511999999999?text=Quero%20me%20cadastrar%20no%20Clube%20de%20Fidelidade!"
+                   target="_blank" rel="noopener noreferrer"
+                   class="btn-gold px-6 py-3 text-sm inline-block">
+                    Cadastrar no WhatsApp 💬
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ============================================================
+     6. FOOTER
+============================================================ -->
+<footer id="contato" class="py-16 px-6" style="background: #111; border-top: 1px solid #1a1a1a;">
+    <div class="max-w-5xl mx-auto">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-10 mb-12">
+            <!-- Marca -->
+            <div>
+                <div class="flex items-center gap-3 mb-4">
+                    <span class="text-2xl" aria-hidden="true">✂️</span>
+                    <div>
+                        <p class="font-black uppercase tracking-widest text-white text-sm">Barbearia</p>
+                        <p class="font-light tracking-widest uppercase text-[#c9a258] text-xs">Pais e Filhos</p>
+                    </div>
+                </div>
+                <p class="text-gray-500 text-sm">Tradição, estilo e boa conversa. Tudo no mesmo lugar.</p>
+            </div>
+
+            <!-- Horários -->
+            <div>
+                <h4 class="font-bold text-white text-sm uppercase tracking-widest mb-4">Horário de Funcionamento</h4>
+                <div class="space-y-2 text-sm text-gray-400">
+                    <div class="flex justify-between"><span>Segunda a Sexta</span><span>09h – 20h</span></div>
+                    <div class="flex justify-between"><span>Sábado</span><span>09h – 18h</span></div>
+                    <div class="flex justify-between"><span>Domingo</span><span>Fechado</span></div>
+                </div>
+            </div>
+
+            <!-- Contato -->
+            <div>
+                <h4 class="font-bold text-white text-sm uppercase tracking-widest mb-4">Contato &amp; Localização</h4>
+                <div class="space-y-3 text-sm text-gray-400">
+                    <!-- >>> SUBSTITUA pelo endereço real <<< -->
+                    <p>📍 Rua Exemplo, 123 – Bairro, Cidade – SP</p>
+                    <div class="flex gap-6 mt-2">
+                        <!-- >>> SUBSTITUA pelo número real da barbearia <<< -->
+                        <a href="https://wa.me/5511999999999" target="_blank" rel="noopener noreferrer"
+                           class="hover:text-[#c9a258] transition-colors">💬 WhatsApp</a>
+                        <!-- >>> SUBSTITUA pelo perfil real <<< -->
+                        <a href="https://instagram.com" target="_blank" rel="noopener noreferrer"
+                           class="hover:text-[#c9a258] transition-colors">📸 Instagram</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="border-t border-[#1a1a1a] pt-6 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-gray-600">
+            <p>© 2026 Barbearia Pais e Filhos. Todos os direitos reservados.</p>
+            <div class="flex gap-6">
+                <a href="#" class="hover:text-gray-400 transition-colors">Termos de Uso</a>
+                <a href="#" class="hover:text-gray-400 transition-colors">Política de Privacidade</a>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- ============================================================
+     MODAL DE AGENDAMENTO
+============================================================ -->
+<div id="modal-overlay" role="dialog" aria-modal="true" aria-label="Agendamento online"
+     onclick="handleOverlayClick(event)">
+    <div id="modal-content"
+         class="w-full max-w-[420px] mx-4 rounded-2xl overflow-hidden"
+         style="background: #111; border: 1px solid #2a2a2a;"
+         onclick="event.stopPropagation()">
+
+        <!-- Cabeçalho do modal -->
+        <div class="bg-black p-6 text-center text-white relative">
+            <button onclick="closeModal()" aria-label="Fechar"
+                    class="absolute top-4 right-4 text-gray-500 hover:text-white text-xl transition-colors">✕</button>
+            <h2 class="text-xl font-bold tracking-widest uppercase">Barbearia</h2>
+            <div class="my-3 mx-auto w-14 h-14 border-2 border-[#c9a258] rounded-full flex items-center justify-center">
+                <span class="text-xl" aria-hidden="true">✂️</span>
+            </div>
+            <p class="text-xs tracking-widest uppercase text-[#c9a258]">Pais e Filhos</p>
+            <p class="text-lg font-medium mt-2">Agendamento Online</p>
+        </div>
+
+        <!-- Corpo do modal -->
+        <div class="p-5 min-h-[400px] flex flex-col">
+
+            <!-- Passo 1: Serviço -->
+            <div id="step-1" class="step-container flex-1">
+                <h3 class="text-xs font-semibold mb-4 text-gray-400 uppercase tracking-widest">Escolha o serviço</h3>
+                <div class="space-y-2 max-h-[300px] overflow-y-auto pr-1" id="services-list"></div>
+            </div>
+
+            <!-- Passo 2: Data -->
+            <div id="step-2" class="step-container hidden-step flex-1">
+                <h3 class="text-xs font-semibold mb-4 text-gray-400 uppercase tracking-widest">Escolha o dia</h3>
+                <div class="border border-[#2a2a2a] rounded-lg p-3">
+                    <div class="flex justify-between items-center mb-4">
+                        <button class="text-gray-500 hover:text-[#c9a258] transition-colors" aria-label="Mês anterior">◀</button>
+                        <span class="font-semibold text-white" id="lbl-month">Junho 2026</span>
+                        <button class="text-gray-500 hover:text-[#c9a258] transition-colors" aria-label="Próximo mês">▶</button>
+                    </div>
+                    <div class="grid grid-cols-7 gap-1 text-center text-xs font-semibold text-gray-600 mb-2" aria-hidden="true">
+                        <div>D</div><div>S</div><div>T</div><div>Q</div><div>Q</div><div>S</div><div>S</div>
+                    </div>
+                    <div id="calendar-grid" class="grid grid-cols-7 gap-1 text-center text-sm"></div>
+                </div>
+            </div>
+
+            <!-- Passo 3: Horário -->
+            <div id="step-3" class="step-container hidden-step flex-1">
+                <h3 class="text-xs font-semibold mb-4 text-gray-400 uppercase tracking-widest">
+                    Escolha a hora (<span id="lbl-date"></span>)
+                </h3>
+                <div class="space-y-2 h-[300px] overflow-y-auto pr-1" id="time-list"></div>
+            </div>
+
+            <!-- Botões de navegação -->
+            <div class="mt-6 space-y-3 pt-4 border-t border-[#2a2a2a]">
+                <button id="btn-next" onclick="nextStep()"
+                        class="btn-gold w-full py-3 rounded-lg flex justify-center items-center gap-2">
+                    Avançar ➔
+                </button>
+                <button id="btn-back" onclick="prevStep()"
+                        class="btn-outline w-full py-3 rounded-lg flex justify-center items-center gap-2 hidden-step">
+                    ⬅ Trocar dia/serviço
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="toast" role="alert" aria-live="assertive">Por favor, selecione uma opção para avançar.</div>
+
+<script>
+    // =================================================================
+    // CONFIGURAÇÃO
+    // =================================================================
+    // >>> SUBSTITUA pelo número real da barbearia (DDI + DDD + número) <<<
+    const WHATSAPP_NUMBER = "5511999999999";
+
+    // Mês/ano exibidos na agenda (month: 0 = Janeiro … 11 = Dezembro)
+    const SCHEDULE_YEAR  = 2026;
+    const SCHEDULE_MONTH = 5; // Junho
+
+    const MONTH_NAMES = [
+        "Janeiro","Fevereiro","Março","Abril","Maio","Junho",
+        "Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"
+    ];
+
+    // Serviços de barbearia
+    const services = [
+        { id: 1, name: "Barba",                              price: "25,00" },
+        { id: 2, name: "Cavanhaque",                         price: "20,00" },
+        { id: 3, name: "Corte",                              price: "30,00" },
+        { id: 4, name: "Corte, Barba e Sobrancelha",         price: "65,00" },
+        { id: 5, name: "Corte c/ Pigmentação e Sobrancelha", price: "60,00" },
+        { id: 6, name: "Corte e Barba",                      price: "55,00" },
+        { id: 7, name: "Corte e Cavanhaque",                 price: "40,00" },
+        { id: 8, name: "Corte e Sobrancelha",                price: "40,00" }
+    ];
+
+    // Itens do balcão (bar)
+    const barItems = [
+        { name: "Cerveja Artesanal",      price: "18,00" },
+        { name: "Chopp Gelado",           price: "15,00" },
+        { name: "Drink da Casa",          price: "28,00" },
+        { name: "Porção de Batata Frita", price: "22,00" }
+    ];
+
+    // Horários disponíveis
+    const times = ["15:00","15:40","16:20","17:00","17:40","18:20","19:00"];
+
+    // Estado do agendamento
+    let currentStep     = 1;
+    let selectedService = null;
+    let selectedDate    = null;
+    let selectedTime    = null;
+
+    // =================================================================
+    // MODAL
+    // =================================================================
+    function openModal() {
+        currentStep     = 1;
+        selectedService = null;
+        selectedDate    = null;
+        selectedTime    = null;
+        renderServices();
+        renderCalendar();
+        renderTimes();
+        updateView();
+        document.getElementById("modal-overlay").classList.add("active");
+        document.body.style.overflow = "hidden";
+    }
+
+    function closeModal() {
+        document.getElementById("modal-overlay").classList.remove("active");
+        document.body.style.overflow = "";
+    }
+
+    function handleOverlayClick(e) {
+        if (e.target === document.getElementById("modal-overlay")) closeModal();
+    }
+
+    // Fechar modal com Escape
+    document.addEventListener("keydown", e => { if (e.key === "Escape") closeModal(); });
+
+    // =================================================================
+    // RENDERIZAÇÃO DO MODAL
+    // =================================================================
+    function renderServices() {
+        const container = document.getElementById("services-list");
+        container.innerHTML = "";
+        services.forEach(srv => {
+            const isSelected = selectedService === srv.id;
+            const div = document.createElement("div");
+            div.className = `p-3 rounded-lg cursor-pointer transition-all duration-200 flex justify-between items-center
+                ${isSelected
+                    ? "border border-[#c9a258] bg-[#1e1600]"
+                    : "border border-[#2a2a2a] hover:border-[#c9a258]"}`;
+            div.onclick = () => { selectedService = srv.id; renderServices(); };
+            div.innerHTML = `
+                <span class="text-sm text-gray-300">${srv.name}</span>
+                <span class="text-sm font-bold text-[#c9a258]">R$ ${srv.price}</span>
+            `;
+            container.appendChild(div);
+        });
+    }
+
+    function renderCalendar() {
+        const container = document.getElementById("calendar-grid");
+        container.innerHTML = "";
+        const lbl = document.getElementById("lbl-month");
+        if (lbl) lbl.innerText = `${MONTH_NAMES[SCHEDULE_MONTH]} ${SCHEDULE_YEAR}`;
+
+        const firstWeekday = new Date(SCHEDULE_YEAR, SCHEDULE_MONTH, 1).getDay();
+        const daysInMonth  = new Date(SCHEDULE_YEAR, SCHEDULE_MONTH + 1, 0).getDate();
+
+        for (let i = 0; i < firstWeekday; i++) {
+            container.innerHTML += `<div class="p-2"></div>`;
+        }
+        for (let day = 1; day <= daysInMonth; day++) {
+            const isSelected = selectedDate === day;
+            const div = document.createElement("div");
+            div.className = `p-2 rounded cursor-pointer text-sm transition-colors
+                ${isSelected
+                    ? "bg-[#c9a258] text-black font-bold"
+                    : "text-gray-400 hover:bg-[#2a2a2a]"}`;
+            div.innerText = day;
+            div.onclick = () => { selectedDate = day; renderCalendar(); };
+            container.appendChild(div);
+        }
+    }
+
+    function renderTimes() {
+        const container = document.getElementById("time-list");
+        container.innerHTML = "";
+        times.forEach(time => {
+            const isSelected = selectedTime === time;
+            const div = document.createElement("div");
+            div.className = `p-3 border rounded-lg cursor-pointer text-center font-medium transition-all
+                ${isSelected
+                    ? "border-[#c9a258] bg-[#1e1600] text-[#c9a258]"
+                    : "border-[#2a2a2a] text-gray-400 hover:border-[#c9a258]"}`;
+            div.onclick = () => { selectedTime = time; renderTimes(); };
+            div.innerText = time;
+            container.appendChild(div);
+        });
+    }
+
+    // =================================================================
+    // NAVEGAÇÃO DO MODAL
+    // =================================================================
+    function nextStep() {
+        if (currentStep === 1 && !selectedService) return showToast("Escolha um Serviço para avançar.");
+        if (currentStep === 2 && !selectedDate)    return showToast("Escolha um Dia para avançar.");
+        if (currentStep === 3 && !selectedTime)    return showToast("Escolha uma Hora para finalizar.");
+
+        if (currentStep === 3) {
+            sendToWhatsApp();
+            closeModal();
+            return;
+        }
+
+        if (currentStep === 2) {
+            document.getElementById("lbl-date").innerText = formatDate(selectedDate);
+        }
+
+        currentStep++;
+        updateView();
+    }
+
+    function prevStep() {
+        if (currentStep > 1) { currentStep--; updateView(); }
+    }
+
+    function updateView() {
+        ["step-1","step-2","step-3"].forEach(id =>
+            document.getElementById(id).classList.add("hidden-step")
+        );
+        document.getElementById(`step-${currentStep}`).classList.remove("hidden-step");
+
+        const btnBack = document.getElementById("btn-back");
+        const btnNext = document.getElementById("btn-next");
+
+        if (currentStep === 1) {
+            btnBack.classList.add("hidden-step");
+            btnNext.innerHTML = "Avançar ➔";
+        } else if (currentStep === 3) {
+            btnBack.classList.remove("hidden-step");
+            btnNext.innerHTML = "Confirmar Agendamento ✓";
+        } else {
+            btnBack.classList.remove("hidden-step");
+            btnNext.innerHTML = "Avançar ➔";
+        }
+    }
+
+    // =================================================================
+    // HELPERS
+    // =================================================================
+    function formatDate(day) {
+        const dd = day.toString().padStart(2, "0");
+        const mm = (SCHEDULE_MONTH + 1).toString().padStart(2, "0");
+        return `${dd}/${mm}/${SCHEDULE_YEAR}`;
+    }
+
+    function sendToWhatsApp() {
+        const srv = services.find(s => s.id === selectedService);
+        const message =
+            `Olá! Gostaria de confirmar meu agendamento na Barbearia Pais e Filhos:%0A%0A` +
+            `✂️ *Serviço:* ${srv.name} (R$ ${srv.price})%0A` +
+            `📅 *Data:* ${formatDate(selectedDate)}%0A` +
+            `🕐 *Horário:* ${selectedTime}`;
+        window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${message}`, "_blank");
+    }
+
+    function showToast(message) {
+        const toast = document.getElementById("toast");
+        toast.innerText = message;
+        toast.classList.add("show");
+        setTimeout(() => toast.classList.remove("show"), 3000);
+    }
+
+    // =================================================================
+    // RENDERIZAÇÃO DAS SEÇÕES DA LANDING PAGE
+    // =================================================================
+    function renderChairServices() {
+        const container = document.getElementById("chair-services");
+        if (!container) return;
+        container.innerHTML = "";
+        services.forEach((srv, i) => {
+            const div = document.createElement("div");
+            div.className = "card p-5 cursor-pointer reveal-scale";
+            div.style.transitionDelay = `${i * 0.07}s`;
+            div.onclick = openModal;
+            div.innerHTML = `
+                <p class="text-gray-300 text-sm mb-3">${srv.name}</p>
+                <p class="text-[#c9a258] text-xl font-black">R$ ${srv.price}</p>
+                <p class="text-gray-600 text-xs mt-2">Clique para agendar</p>
+            `;
+            container.appendChild(div);
+        });
+    }
+
+    function renderBarItems() {
+        const container = document.getElementById("bar-items");
+        if (!container) return;
+        container.innerHTML = "";
+        barItems.forEach((item, i) => {
+            const div = document.createElement("div");
+            div.className = "card p-5 reveal-scale";
+            div.style.transitionDelay = `${i * 0.07}s`;
+            div.innerHTML = `
+                <p class="text-gray-300 text-sm mb-3">${item.name}</p>
+                <p class="text-[#c9a258] text-xl font-black">R$ ${item.price}</p>
+            `;
+            container.appendChild(div);
+        });
+    }
+
+    function renderGallery() {
+        const container = document.getElementById("gallery-grid");
+        if (!container) return;
+        container.innerHTML = "";
+        const items = [
+            { label: "As Maquininhas", grad: "linear-gradient(135deg,#1a1a1a 0%,#2a2000 100%)" },
+            { label: "O Ambiente",     grad: "linear-gradient(135deg,#0a0a0a 0%,#1a1500 100%)" },
+            { label: "O Cofre",        grad: "linear-gradient(135deg,#1a1a1a 0%,#2a1500 100%)" },
+            { label: "A Cadeira",      grad: "linear-gradient(135deg,#111    0%,#1a0a00 100%)" },
+            { label: "O Balcão",       grad: "linear-gradient(135deg,#1a1a1a 0%,#0a1a00 100%)" },
+            { label: "Os Detalhes",    grad: "linear-gradient(135deg,#0a0a0a 0%,#1a1a00 100%)" },
         ];
+        items.forEach((item, i) => {
+            const wrapper = document.createElement("div");
+            wrapper.className = "gallery-item reveal-scale";
+            wrapper.style.height = "280px";
+            wrapper.style.transitionDelay = `${i * 0.08}s`;
+            wrapper.innerHTML = `
+                <div style="width:100%;height:100%;background:${item.grad};
+                            display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;">
+                    <span style="font-size:2rem;" aria-hidden="true">📷</span>
+                    <p style="color:#c9a258;font-size:.75rem;letter-spacing:.15em;text-transform:uppercase;font-weight:600;">
+                        ${item.label}
+                    </p>
+                </div>
+            `;
+            container.appendChild(wrapper);
+        });
+    }
 
-        // Dados Mockados baseados nas imagens
-        const services = [
-            { id: 1, name: "barba", price: "25,00" },
-            { id: 2, name: "cavanhaque", price: "20,00" },
-            { id: 3, name: "corte", price: "30,00" },
-            { id: 4, name: "corte barba e sobrancelha", price: "65,00" },
-            { id: 5, name: "corte com pigmentação e sobrancelha", price: "60,00" },
-            { id: 6, name: "corte e barba", price: "55,00" },
-            { id: 7, name: "corte e cavanhaque", price: "40,00" },
-            { id: 8, name: "corte e sobrancelha", price: "40,00" }
-        ];
-
-        const times = ["15:00", "15:40", "16:20", "17:00", "17:40", "18:20", "19:00"];
-
-        // Estado da Aplicação
-        let currentStep = 1;
-        let selectedService = null;
-        let selectedDate = "5"; // Pré-selecionado baseado na print
-        let selectedTime = null;
-
-        // --- Renderização Inicial ---
-        function init() {
-            renderServices();
-            renderCalendar();
-            renderTimes();
-        }
-
-        // Renderiza lista de serviços
-        function renderServices() {
-            const container = document.getElementById("services-list");
-            container.innerHTML = "";
-            services.forEach(srv => {
-                const isSelected = selectedService === srv.id;
-                const div = document.createElement("div");
-                div.className = `p-3 border rounded-lg cursor-pointer transition-all duration-200 flex justify-between items-center ${isSelected ? 'border-blue-500 bg-blue-50 ring-1 ring-blue-500' : 'border-gray-200 hover:border-blue-300'}`;
-                div.onclick = () => {
-                    selectedService = srv.id;
-                    renderServices(); // Re-render para atualizar o estilo de seleção
-                };
-                div.innerHTML = `
-                    <span class="text-sm text-slate-700 capitalize">${srv.name}</span>
-                    <span class="text-sm font-semibold text-slate-900">R$ ${srv.price}</span>
-                `;
-                container.appendChild(div);
+    // =================================================================
+    // SCROLL ANIMATIONS (IntersectionObserver)
+    // =================================================================
+    function observeRevealElements() {
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add("visible");
+                    observer.unobserve(entry.target);
+                }
             });
+        }, { threshold: 0.12, rootMargin: "0px 0px -40px 0px" });
+
+        document.querySelectorAll(".reveal:not(.visible), .reveal-scale:not(.visible)")
+                .forEach(el => observer.observe(el));
+    }
+
+    // =================================================================
+    // NAVBAR — efeito de scroll
+    // =================================================================
+    const navbar = document.getElementById("navbar");
+    window.addEventListener("scroll", () => {
+        if (window.scrollY > 60) {
+            navbar.style.background     = "rgba(10,10,10,.95)";
+            navbar.style.borderBottom   = "1px solid #1a1a1a";
+            navbar.style.backdropFilter = "blur(10px)";
+        } else {
+            navbar.style.background     = "transparent";
+            navbar.style.borderBottom   = "none";
+            navbar.style.backdropFilter = "none";
         }
+    }, { passive: true });
 
-        // Renderiza Calendário dinamicamente (mês/ano configurados)
-        function renderCalendar() {
-            const container = document.getElementById("calendar-grid");
-            container.innerHTML = "";
-
-            // Atualiza o rótulo do mês
-            const lblMonth = document.getElementById("lbl-month");
-            if (lblMonth) {
-                lblMonth.innerText = `${MONTH_NAMES[SCHEDULE_MONTH]} ${SCHEDULE_YEAR}`;
-            }
-
-            // Dia da semana do dia 1 (0 = Domingo) e total de dias no mês
-            const firstWeekday = new Date(SCHEDULE_YEAR, SCHEDULE_MONTH, 1).getDay();
-            const daysInMonth = new Date(SCHEDULE_YEAR, SCHEDULE_MONTH + 1, 0).getDate();
-
-            // Espaços vazios para alinhar o dia 1 ao dia da semana correto
-            for (let i = 0; i < firstWeekday; i++) {
-                container.innerHTML += `<div class="p-2 text-gray-300 bg-gray-50 rounded"></div>`;
-            }
-
-            for (let day = 1; day <= daysInMonth; day++) {
-                const isSelected = selectedDate == day;
-                const div = document.createElement("div");
-                div.className = `p-2 rounded cursor-pointer text-sm transition-colors ${isSelected ? 'bg-indigo-500 text-white font-bold shadow-md' : 'hover:bg-indigo-100 text-slate-700'}`;
-                div.innerText = day;
-                div.onclick = () => {
-                    selectedDate = day;
-                    renderCalendar();
-                };
-                container.appendChild(div);
-            }
-        }
-
-        // Renderiza Horários
-        function renderTimes() {
-            const container = document.getElementById("time-list");
-            container.innerHTML = "";
-            times.forEach(time => {
-                const isSelected = selectedTime === time;
-                const div = document.createElement("div");
-                div.className = `p-3 border rounded-lg cursor-pointer text-center font-medium transition-all ${isSelected ? 'border-indigo-500 bg-indigo-50 text-indigo-700 ring-1 ring-indigo-500' : 'border-blue-200 text-blue-600 hover:bg-blue-50'}`;
-                div.onclick = () => {
-                    selectedTime = time;
-                    renderTimes();
-                };
-                div.innerText = time;
-                container.appendChild(div);
-            });
-        }
-
-        // --- Navegação ---
-        function nextStep() {
-            // Validações
-            if (currentStep === 1 && !selectedService) return showToast("Escolha um Serviço para avançar.");
-            if (currentStep === 2 && !selectedDate) return showToast("Escolha um Dia para avançar.");
-            if (currentStep === 3 && !selectedTime) return showToast("Escolha uma Hora para finalizar.");
-
-            if (currentStep === 3) {
-                sendToWhatsApp();
-                // Reseta a aplicação
-                currentStep = 1; selectedService = null; selectedDate = "5"; selectedTime = null;
-                init();
-                updateView();
-                return;
-            }
-
-            if(currentStep === 2) {
-                // Atualiza o texto do dia no passo 3
-                document.getElementById('lbl-date').innerText = formatDate(selectedDate);
-            }
-
-            currentStep++;
-            updateView();
-        }
-
-        function prevStep() {
-            if (currentStep > 1) {
-                currentStep--;
-                updateView();
-            }
-        }
-
-        function updateView() {
-            // Esconde todos
-            document.getElementById("step-1").classList.add("hidden-step");
-            document.getElementById("step-2").classList.add("hidden-step");
-            document.getElementById("step-3").classList.add("hidden-step");
-
-            // Mostra o atual
-            document.getElementById(`step-${currentStep}`).classList.remove("hidden-step");
-
-            // Botões
-            const btnBack = document.getElementById("btn-back");
-            const btnNext = document.getElementById("btn-next");
-
-            if (currentStep === 1) {
-                btnBack.classList.add("hidden-step");
-                btnNext.innerHTML = "Avançar ➔";
-            } else if (currentStep === 3) {
-                btnBack.classList.remove("hidden-step");
-                btnNext.innerHTML = "Confirmar Agendamento ✓";
-            } else {
-                btnBack.classList.remove("hidden-step");
-                btnNext.innerHTML = "Avançar ➔";
-            }
-        }
-
-        // --- Helpers de data / WhatsApp ---
-        // Formata o dia selecionado como DD/MM/AAAA usando o mês configurado
-        function formatDate(day) {
-            const dd = day.toString().padStart(2, "0");
-            const mm = (SCHEDULE_MONTH + 1).toString().padStart(2, "0");
-            return `${dd}/${mm}/${SCHEDULE_YEAR}`;
-        }
-
-        // Monta a mensagem do agendamento e abre o WhatsApp da barbearia
-        function sendToWhatsApp() {
-            const service = services.find(s => s.id === selectedService);
-            const serviceName = service ? service.name : "";
-            const servicePrice = service ? `R$ ${service.price}` : "";
-
-            const message =
-                `Olá! Gostaria de confirmar meu agendamento na Barbearia Pais e Filhos:%0A%0A` +
-                `✂️ *Serviço:* ${serviceName} (${servicePrice})%0A` +
-                `📅 *Data:* ${formatDate(selectedDate)}%0A` +
-                `🕐 *Horário:* ${selectedTime}`;
-
-            const url = `https://wa.me/${WHATSAPP_NUMBER}?text=${message}`;
-            window.open(url, "_blank");
-        }
-
-        // --- Toast (Aviso de erro) ---
-        function showToast(message) {
-            const toast = document.getElementById("toast");
-            toast.innerText = message;
-            toast.classList.add("show");
-            setTimeout(function(){ toast.classList.remove("show"); }, 3000);
-        }
-
-        // Inicializa a aplicação
-        window.onload = init;
-    </script>
+    // =================================================================
+    // INICIALIZAÇÃO
+    // =================================================================
+    window.onload = () => {
+        renderChairServices();
+        renderBarItems();
+        renderGallery();
+        observeRevealElements();
+    };
+</script>
 </body>
 </html>
