@@ -78,7 +78,7 @@
                 <div class="border rounded-lg p-3">
                     <div class="flex justify-between items-center mb-4">
                         <button class="text-gray-400 hover:text-black">◀</button>
-                        <span class="font-semibold text-slate-700">Junho 2026</span>
+                        <span class="font-semibold text-slate-700" id="lbl-month">Junho 2026</span>
                         <button class="text-gray-400 hover:text-black">▶</button>
                     </div>
                     <div class="grid grid-cols-7 gap-1 text-center text-xs font-semibold text-gray-400 mb-2">
@@ -110,6 +110,23 @@
     <div id="toast">Por favor, selecione uma opção para avançar.</div>
 
     <script>
+        // ==========================================================
+        // CONFIGURAÇÃO
+        // ==========================================================
+        // Número da barbearia no formato internacional, somente dígitos
+        // (DDI + DDD + número). Ex.: 55 (Brasil) + 11 + 999999999.
+        // >>> SUBSTITUA pelo número real da barbearia <<<
+        const WHATSAPP_NUMBER = "5511999999999";
+
+        // Mês/ano exibidos na agenda (month: 0 = Janeiro ... 11 = Dezembro)
+        const SCHEDULE_YEAR = 2026;
+        const SCHEDULE_MONTH = 5; // Junho
+
+        const MONTH_NAMES = [
+            "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
+            "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"
+        ];
+
         // Dados Mockados baseados nas imagens
         const services = [
             { id: 1, name: "barba", price: "25,00" },
@@ -157,17 +174,27 @@
             });
         }
 
-        // Renderiza Calendário de Junho 2026
+        // Renderiza Calendário dinamicamente (mês/ano configurados)
         function renderCalendar() {
             const container = document.getElementById("calendar-grid");
             container.innerHTML = "";
-            
-            // Espaços vazios para alinhar o dia 1
-            for(let i=0; i<1; i++) { 
-                container.innerHTML += `<div class="p-2 text-gray-300 bg-gray-50 rounded"></div>`; 
+
+            // Atualiza o rótulo do mês
+            const lblMonth = document.getElementById("lbl-month");
+            if (lblMonth) {
+                lblMonth.innerText = `${MONTH_NAMES[SCHEDULE_MONTH]} ${SCHEDULE_YEAR}`;
             }
 
-            for (let day = 1; day <= 30; day++) {
+            // Dia da semana do dia 1 (0 = Domingo) e total de dias no mês
+            const firstWeekday = new Date(SCHEDULE_YEAR, SCHEDULE_MONTH, 1).getDay();
+            const daysInMonth = new Date(SCHEDULE_YEAR, SCHEDULE_MONTH + 1, 0).getDate();
+
+            // Espaços vazios para alinhar o dia 1 ao dia da semana correto
+            for (let i = 0; i < firstWeekday; i++) {
+                container.innerHTML += `<div class="p-2 text-gray-300 bg-gray-50 rounded"></div>`;
+            }
+
+            for (let day = 1; day <= daysInMonth; day++) {
                 const isSelected = selectedDate == day;
                 const div = document.createElement("div");
                 div.className = `p-2 rounded cursor-pointer text-sm transition-colors ${isSelected ? 'bg-indigo-500 text-white font-bold shadow-md' : 'hover:bg-indigo-100 text-slate-700'}`;
@@ -205,7 +232,7 @@
             if (currentStep === 3 && !selectedTime) return showToast("Escolha uma Hora para finalizar.");
 
             if (currentStep === 3) {
-                alert("Agendamento Concluído com Sucesso! 🎉");
+                sendToWhatsApp();
                 // Reseta a aplicação
                 currentStep = 1; selectedService = null; selectedDate = "5"; selectedTime = null;
                 init();
@@ -215,7 +242,7 @@
 
             if(currentStep === 2) {
                 // Atualiza o texto do dia no passo 3
-                document.getElementById('lbl-date').innerText = `${selectedDate.toString().padStart(2, '0')}/06/2026`;
+                document.getElementById('lbl-date').innerText = formatDate(selectedDate);
             }
 
             currentStep++;
@@ -252,6 +279,30 @@
                 btnBack.classList.remove("hidden-step");
                 btnNext.innerHTML = "Avançar ➔";
             }
+        }
+
+        // --- Helpers de data / WhatsApp ---
+        // Formata o dia selecionado como DD/MM/AAAA usando o mês configurado
+        function formatDate(day) {
+            const dd = day.toString().padStart(2, "0");
+            const mm = (SCHEDULE_MONTH + 1).toString().padStart(2, "0");
+            return `${dd}/${mm}/${SCHEDULE_YEAR}`;
+        }
+
+        // Monta a mensagem do agendamento e abre o WhatsApp da barbearia
+        function sendToWhatsApp() {
+            const service = services.find(s => s.id === selectedService);
+            const serviceName = service ? service.name : "";
+            const servicePrice = service ? `R$ ${service.price}` : "";
+
+            const message =
+                `Olá! Gostaria de confirmar meu agendamento na Barbearia Pais e Filhos:%0A%0A` +
+                `✂️ *Serviço:* ${serviceName} (${servicePrice})%0A` +
+                `📅 *Data:* ${formatDate(selectedDate)}%0A` +
+                `🕐 *Horário:* ${selectedTime}`;
+
+            const url = `https://wa.me/${WHATSAPP_NUMBER}?text=${message}`;
+            window.open(url, "_blank");
         }
 
         // --- Toast (Aviso de erro) ---
