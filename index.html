@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Barbearia Pais e Filhos - Agendamento</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        
+        /* Customizações de scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb { background: #c1c1c1; border-radius: 4px; }
+        
+        /* Ocultar elementos */
+        .hidden-step { display: none !important; }
+
+        /* Toast de erro */
+        #toast {
+            visibility: hidden;
+            min-width: 250px;
+            background-color: #ef4444; /* Vermelho Tailwind */
+            color: #fff;
+            text-align: center;
+            border-radius: 8px;
+            padding: 12px;
+            position: fixed;
+            z-index: 50;
+            left: 50%;
+            bottom: 30px;
+            transform: translateX(-50%);
+            font-size: 14px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: visibility 0.3s, opacity 0.3s linear;
+            opacity: 0;
+        }
+        #toast.show {
+            visibility: visible;
+            opacity: 1;
+        }
+    </style>
+</head>
+<body class="bg-blue-100 min-h-screen text-slate-800 flex justify-center pb-10">
+
+    <div class="w-full max-w-[420px] p-4 space-y-4">
+        
+        <div class="bg-white rounded-xl shadow-sm overflow-hidden animate__animated animate__fadeInDown">
+            <div class="bg-black p-8 text-center text-white relative">
+                <h1 class="text-2xl font-bold tracking-widest uppercase">Barbearia</h1>
+                <div class="my-3 mx-auto w-16 h-16 border-2 border-white rounded-full flex items-center justify-center">
+                    <span class="text-2xl">✂️</span>
+                </div>
+                <p class="text-xs tracking-widest mb-1 uppercase">Pais e Filhos</p>
+                <h2 class="text-xl font-medium mt-4">Raul Mateus</h2>
+            </div>
+            <div class="p-3 bg-gray-50 border-t border-gray-100 text-sm text-gray-600 text-center">
+                barbearia pais e filhos 💈
+            </div>
+        </div>
+
+        <div class="bg-white p-5 rounded-xl shadow-sm min-h-[400px] flex flex-col animate__animated animate__fadeInUp">
+            
+            <div id="step-1" class="step-container flex-1">
+                <h3 class="text-lg font-semibold mb-4 text-slate-700">Escolha o serviço</h3>
+                <div class="space-y-2 max-h-[300px] overflow-y-auto pr-1" id="services-list">
+                    </div>
+            </div>
+
+            <div id="step-2" class="step-container hidden-step flex-1 animate__animated animate__fadeIn">
+                <h3 class="text-lg font-semibold mb-4 text-slate-700">Escolha o dia</h3>
+                <div class="border rounded-lg p-3">
+                    <div class="flex justify-between items-center mb-4">
+                        <button class="text-gray-400 hover:text-black">◀</button>
+                        <span class="font-semibold text-slate-700">Junho 2026</span>
+                        <button class="text-gray-400 hover:text-black">▶</button>
+                    </div>
+                    <div class="grid grid-cols-7 gap-1 text-center text-xs font-semibold text-gray-400 mb-2">
+                        <div>D</div><div>S</div><div>T</div><div>Q</div><div>Q</div><div>S</div><div>S</div>
+                    </div>
+                    <div id="calendar-grid" class="grid grid-cols-7 gap-1 text-center text-sm">
+                        </div>
+                </div>
+            </div>
+
+            <div id="step-3" class="step-container hidden-step flex-1 animate__animated animate__fadeIn">
+                <h3 class="text-lg font-semibold mb-4 text-slate-700">Escolha a hora (<span id="lbl-date"></span>)</h3>
+                <div class="space-y-2 h-[300px] overflow-y-auto pr-1" id="time-list">
+                    </div>
+            </div>
+
+            <div class="mt-6 space-y-3 pt-4 border-t border-gray-100">
+                <button id="btn-next" onclick="nextStep()" class="w-full bg-[#5cb85c] hover:bg-[#4cae4c] text-white font-medium py-3 rounded-lg transition-colors flex justify-center items-center gap-2 shadow-sm">
+                    Avançar ➔
+                </button>
+                <button id="btn-back" onclick="prevStep()" class="w-full bg-white border border-gray-300 text-gray-600 hover:bg-gray-50 font-medium py-3 rounded-lg transition-colors flex justify-center items-center gap-2 hidden-step">
+                    ⬅ Trocar dia/serviço
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+    <div id="toast">Por favor, selecione uma opção para avançar.</div>
+
+    <script>
+        // Dados Mockados baseados nas imagens
+        const services = [
+            { id: 1, name: "barba", price: "25,00" },
+            { id: 2, name: "cavanhaque", price: "20,00" },
+            { id: 3, name: "corte", price: "30,00" },
+            { id: 4, name: "corte barba e sobrancelha", price: "65,00" },
+            { id: 5, name: "corte com pigmentação e sobrancelha", price: "60,00" },
+            { id: 6, name: "corte e barba", price: "55,00" },
+            { id: 7, name: "corte e cavanhaque", price: "40,00" },
+            { id: 8, name: "corte e sobrancelha", price: "40,00" }
+        ];
+
+        const times = ["15:00", "15:40", "16:20", "17:00", "17:40", "18:20", "19:00"];
+
+        // Estado da Aplicação
+        let currentStep = 1;
+        let selectedService = null;
+        let selectedDate = "5"; // Pré-selecionado baseado na print
+        let selectedTime = null;
+
+        // --- Renderização Inicial ---
+        function init() {
+            renderServices();
+            renderCalendar();
+            renderTimes();
+        }
+
+        // Renderiza lista de serviços
+        function renderServices() {
+            const container = document.getElementById("services-list");
+            container.innerHTML = "";
+            services.forEach(srv => {
+                const isSelected = selectedService === srv.id;
+                const div = document.createElement("div");
+                div.className = `p-3 border rounded-lg cursor-pointer transition-all duration-200 flex justify-between items-center ${isSelected ? 'border-blue-500 bg-blue-50 ring-1 ring-blue-500' : 'border-gray-200 hover:border-blue-300'}`;
+                div.onclick = () => {
+                    selectedService = srv.id;
+                    renderServices(); // Re-render para atualizar o estilo de seleção
+                };
+                div.innerHTML = `
+                    <span class="text-sm text-slate-700 capitalize">${srv.name}</span>
+                    <span class="text-sm font-semibold text-slate-900">R$ ${srv.price}</span>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        // Renderiza Calendário de Junho 2026
+        function renderCalendar() {
+            const container = document.getElementById("calendar-grid");
+            container.innerHTML = "";
+            
+            // Espaços vazios para alinhar o dia 1
+            for(let i=0; i<1; i++) { 
+                container.innerHTML += `<div class="p-2 text-gray-300 bg-gray-50 rounded"></div>`; 
+            }
+
+            for (let day = 1; day <= 30; day++) {
+                const isSelected = selectedDate == day;
+                const div = document.createElement("div");
+                div.className = `p-2 rounded cursor-pointer text-sm transition-colors ${isSelected ? 'bg-indigo-500 text-white font-bold shadow-md' : 'hover:bg-indigo-100 text-slate-700'}`;
+                div.innerText = day;
+                div.onclick = () => {
+                    selectedDate = day;
+                    renderCalendar();
+                };
+                container.appendChild(div);
+            }
+        }
+
+        // Renderiza Horários
+        function renderTimes() {
+            const container = document.getElementById("time-list");
+            container.innerHTML = "";
+            times.forEach(time => {
+                const isSelected = selectedTime === time;
+                const div = document.createElement("div");
+                div.className = `p-3 border rounded-lg cursor-pointer text-center font-medium transition-all ${isSelected ? 'border-indigo-500 bg-indigo-50 text-indigo-700 ring-1 ring-indigo-500' : 'border-blue-200 text-blue-600 hover:bg-blue-50'}`;
+                div.onclick = () => {
+                    selectedTime = time;
+                    renderTimes();
+                };
+                div.innerText = time;
+                container.appendChild(div);
+            });
+        }
+
+        // --- Navegação ---
+        function nextStep() {
+            // Validações
+            if (currentStep === 1 && !selectedService) return showToast("Escolha um Serviço para avançar.");
+            if (currentStep === 2 && !selectedDate) return showToast("Escolha um Dia para avançar.");
+            if (currentStep === 3 && !selectedTime) return showToast("Escolha uma Hora para finalizar.");
+
+            if (currentStep === 3) {
+                alert("Agendamento Concluído com Sucesso! 🎉");
+                // Reseta a aplicação
+                currentStep = 1; selectedService = null; selectedDate = "5"; selectedTime = null;
+                init();
+                updateView();
+                return;
+            }
+
+            if(currentStep === 2) {
+                // Atualiza o texto do dia no passo 3
+                document.getElementById('lbl-date').innerText = `${selectedDate.toString().padStart(2, '0')}/06/2026`;
+            }
+
+            currentStep++;
+            updateView();
+        }
+
+        function prevStep() {
+            if (currentStep > 1) {
+                currentStep--;
+                updateView();
+            }
+        }
+
+        function updateView() {
+            // Esconde todos
+            document.getElementById("step-1").classList.add("hidden-step");
+            document.getElementById("step-2").classList.add("hidden-step");
+            document.getElementById("step-3").classList.add("hidden-step");
+
+            // Mostra o atual
+            document.getElementById(`step-${currentStep}`).classList.remove("hidden-step");
+
+            // Botões
+            const btnBack = document.getElementById("btn-back");
+            const btnNext = document.getElementById("btn-next");
+
+            if (currentStep === 1) {
+                btnBack.classList.add("hidden-step");
+                btnNext.innerHTML = "Avançar ➔";
+            } else if (currentStep === 3) {
+                btnBack.classList.remove("hidden-step");
+                btnNext.innerHTML = "Confirmar Agendamento ✓";
+            } else {
+                btnBack.classList.remove("hidden-step");
+                btnNext.innerHTML = "Avançar ➔";
+            }
+        }
+
+        // --- Toast (Aviso de erro) ---
+        function showToast(message) {
+            const toast = document.getElementById("toast");
+            toast.innerText = message;
+            toast.classList.add("show");
+            setTimeout(function(){ toast.classList.remove("show"); }, 3000);
+        }
+
+        // Inicializa a aplicação
+        window.onload = init;
+    </script>
+</body>
+</html>
